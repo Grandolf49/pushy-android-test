@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "584773370556",
+    "project_id": "fcm-pushy-test",
+    "storage_bucket": "fcm-pushy-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584773370556:android:80f41b9fe9442a7820c6b9",
+        "android_client_info": {
+          "package_name": "com.notifications.pushy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584773370556-a3e5ljjope4jdlst0pcuuvv5pldbfpb4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxYqMt8FvC1GuHjkDLFCeKfVIK6EGXClA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584773370556-a3e5ljjope4jdlst0pcuuvv5pldbfpb4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
