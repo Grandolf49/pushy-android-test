@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'com.google.gms.google-services'
+//    id 'com.google.gms.google-services'
 }
 
 android {
@@ -40,8 +40,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
 
     // Firebase
-    implementation platform('com.google.firebase:firebase-bom:29.0.3')
-    implementation 'com.google.firebase:firebase-messaging:23.0.0'
+//    implementation platform('com.google.firebase:firebase-bom:29.0.3')
+//    implementation 'com.google.firebase:firebase-messaging:23.0.0'
 
     // Pushy
     implementation 'me.pushy:sdk:1.0.77'

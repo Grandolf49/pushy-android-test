@@ -1,7 +1,6 @@
 package com.notifications.pushy
 
-import android.app.Activity
-import android.app.AlertDialog
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -13,18 +12,68 @@ import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import me.pushy.sdk.Pushy
+import me.pushy.sdk.services.PushySocketService
 
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Pushy.listen(this)
         setContentView(R.layout.activity_main)
 
-        // Whitelist app from battery optimization
-        // Android M (6) and up only
+        // Not registered yet?
+        if (getDeviceToken() == null) {
+            // Register with Pushy
+            RegisterForPushNotificationsAsync(this).execute()
+        } else {
+            // Start Pushy notification service if not already running
+            startForegroundService()
+            Pushy.listen(this)
+        }
+
+        // Enable FCM Fallback Delivery
+//        Pushy.toggleFCM(true, this);
+    }
+
+    /**
+     * Pushy foreground service implementation
+     */
+    private fun startForegroundService() {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+
+        // Get app name as string
+        val appName = packageManager.getApplicationLabel(applicationInfo).toString()
+        val description = "Listening for notifications"
+
+        // Android O and newer requires notification channels
+        // to be created prior to dispatching a notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel =
+                NotificationChannel("pushy_ongoing", appName, NotificationManager.IMPORTANCE_MIN)
+            channel.description = description
+
+            // Register the channel with the system
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Create foreground notification using pushy_ongoing notification channel (customize as necessary)
+        val notification: Notification = NotificationCompat.Builder(this, "pushy_ongoing")
+            .setContentTitle(appName)
+            .setContentText(description)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        // Configure Pushy SDK to start a foreground service with this notification
+        // Must be called before Pushy.listen();
+        PushySocketService.setForegroundNotification(notification)
+    }
+
+    private fun whitelistBatteryOptimization() {
         // Android M (6) and up only
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Get power manager instance
@@ -47,18 +96,6 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton("Cancel", null).show()
             }
         }
-
-        // Not registered yet?
-        if (getDeviceToken() == null) {
-            // Register with Pushy
-            RegisterForPushNotificationsAsync(this).execute()
-        } else {
-            // Start Pushy notification service if not already running
-            Pushy.listen(this)
-        }
-
-        // Enable FCM Fallback Delivery
-        Pushy.toggleFCM(true, this);
     }
 
     private fun getDeviceToken(): String? {
@@ -69,9 +106,6 @@ class MainActivity : AppCompatActivity() {
     fun saveDeviceToken(deviceToken: String) {
         // Save token locally in app SharedPreferences
         getSharedPreferences().edit().putString("deviceToken", deviceToken).apply()
-
-        // Your app should store the device token in your backend database
-        //new URL("https://{YOUR_API_HOSTNAME}/register/device?token=" + deviceToken).openConnection();
     }
 
     private fun getSharedPreferences(): SharedPreferences {
@@ -102,19 +136,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPostExecute(result: Any) {
-            val message: String
-
             // Registration failed?
-            if (result is Exception) {
+            val message: String = if (result is Exception) {
                 // Log to console
                 Log.e("Pushy", result.message.toString())
 
                 // Display error in alert
-                message = result.message.toString()
+                result.message.toString()
             } else {
                 // Registration success, result is device token
-                message = "Pushy device token: $result\n\n(copy from logcat)"
-
+                "Pushy device token: $result\n\n(copy from logcat)"
             }
 
             // Display dialog

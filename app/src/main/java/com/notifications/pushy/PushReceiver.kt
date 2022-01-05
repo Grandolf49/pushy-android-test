@@ -8,7 +8,6 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import me.pushy.sdk.Pushy
 
@@ -25,7 +24,7 @@ class PushReceiver : BroadcastReceiver() {
             ).toString()
 
         // Attempt to extract the "message" property from the data payload: {"message":"Hello World!"}
-        var notificationText =
+        val notificationText =
             if (intent.getStringExtra("message") != null) intent.getStringExtra("message") else "Test notification"
 
         // Prepare a notification with vibration, sound and lights
@@ -55,7 +54,5 @@ class PushReceiver : BroadcastReceiver() {
 
         // Build the notification and display it
         notificationManager.notify(1, builder.build())
-
-        Log.d("Pushy", "onReceive: Is pushy connected? ${Pushy.isConnected()}")
     }
 }
